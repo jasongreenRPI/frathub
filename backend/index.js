@@ -1,6 +1,5 @@
 // Required External Modules
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const morgan = require("morgan");
 const helmet = require("helmet");
@@ -10,6 +9,12 @@ const cookieParser = require("cookie-parser");
 // Required Internal Modules
 const connectDB = require("./database/connect");
 const errorHandler = require("./middleware/error_handler");
+
+// Import Routes
+const authRoutes = require("./routes/auth.routes");
+const organizationRoutes = require("./routes/organization.routes");
+const queueRoutes = require("./routes/queue.routes");
+const userRoutes = require("./routes/user.routes");
 
 // Load Environment Variables
 require("dotenv").config();
@@ -31,6 +36,12 @@ app.use(morgan("dev")); // HTTP request logger
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
+
+// API Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/organizations", organizationRoutes);
+app.use("/api/queues", queueRoutes);
+app.use("/api/users", userRoutes);
 
 // Global Error Handler
 app.use(errorHandler);
@@ -60,3 +71,6 @@ process.on("SIGTERM", () => {
 });
 
 module.exports = app;
+
+
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2Q4NzY4NDgyODYxY2MwMzdmZTFmY2IiLCJlbWFpbCI6ImZyYXRodWJAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwidXNlcm5hbWUiOiJhZG1pbnVzZXIiLCJpYXQiOjE3NDIyMzkzNjQsImV4cCI6MTc0MjMyNTc2NH0.oE48bmIL6XrJsSShHvrSdV52JALGJ_h4ssLnyQmNfsI
