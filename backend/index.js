@@ -70,7 +70,6 @@ process.on("SIGTERM", () => {
   });
 });
 
-module.exports = app;
-
+module.exports = { app, server };
 
 // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2Q4NzY4NDgyODYxY2MwMzdmZTFmY2IiLCJlbWFpbCI6ImZyYXRodWJAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwidXNlcm5hbWUiOiJhZG1pbnVzZXIiLCJpYXQiOjE3NDIyMzkzNjQsImV4cCI6MTc0MjMyNTc2NH0.oE48bmIL6XrJsSShHvrSdV52JALGJ_h4ssLnyQmNfsI

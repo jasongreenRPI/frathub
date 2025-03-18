@@ -387,6 +387,7 @@ class organizationInterface {
 
     return org.officerIds;
   }
+  
 }
 
 organizationSchema.loadClass(organizationInterface);
