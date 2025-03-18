@@ -1,0 +1,19 @@
+# Run all tests
+npm test
+# or
+npm run test:all
+
+# Run tests in watch mode (tests run automatically when files change)
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run individual test files
+npm run test:auth      # Run only authentication tests
+npm run test:org       # Run only organization tests
+npm run test:user      # Run only user tests
+npm run test:queue     # Run only queue tests
+
+# Run tests in CI mode (with coverage and without watch mode)
+npm run test:ci

@@ -1,0 +1,265 @@
+# 2. Permission System Architecture
+
+## Role-Based Access Control (RBAC)
+
+```
+┌───────────────────────────────────────────────────────────┐
+│ Role Definitions                                          │
+├───────────────────────────────────────────────────────────┤
+│ - member: Basic user with standard permissions            │
+│ - officer: Organization officer with elevated access      │
+│ - superuser: Organization superuser with full access      │
+│ - driver: User with driver-specific permissions           │
+└───────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────┐
+│ Permission Matrix                                         │
+├───────────────────────────────────────────────────────────┤
+│ Resource/Action    │ member │ driver │ officer │ superuser│
+├───────────────────┼────────┼────────┼─────────┼──────────┤
+│ User                                                      │
+├───────────────────┼────────┼────────┼─────────┼──────────┤
+│ viewProfile        │   ✓    │   ✓    │    ✓    │    ✓     │
+│ updateOwnProfile   │   ✓    │   ✓    │    ✓    │    ✓     │
+│ viewOtherProfiles  │   ✓    │   ✓    │    ✓    │    ✓     │
+│ updateOtherProfiles│        │        │    ✓    │    ✓     │
+│ assignRoles        │        │        │         │    ✓     │
+├───────────────────┼────────┼────────┼─────────┼──────────┤
+│ Organization                                              │
+├───────────────────┼────────┼────────┼─────────┼──────────┤
+│ view              │   ✓    │   ✓    │    ✓    │    ✓     │
+│ update            │        │        │    ✓    │    ✓     │
+│ updateSettings    │        │        │    ✓    │    ✓     │
+│ manageMembers     │        │        │    ✓    │    ✓     │
+│ manageOfficers    │        │        │         │    ✓     │
+├───────────────────┼────────┼────────┼─────────┼──────────┤
+│ Events                                                    │
+├───────────────────┼────────┼────────┼─────────┼──────────┤
+│ view              │   ✓    │   ✓    │    ✓    │    ✓     │
+│ create            │        │        │    ✓    │    ✓     │
+│ update            │        │        │    ✓    │    ✓     │
+│ delete            │        │        │    ✓    │    ✓     │
+│ uploadPhotos      │   ✓    │   ✓    │    ✓    │    ✓     │
+│ createPoll        │        │        │    ✓    │    ✓     │
+│ respondToPoll     │   ✓    │   ✓    │    ✓    │    ✓     │
+├───────────────────┼────────┼────────┼─────────┼──────────┤
+│ Queue                                                     │
+├───────────────────┼────────┼────────┼─────────┼──────────┤
+│ viewQueue         │   ✓    │   ✓    │    ✓    │    ✓     │
+│ manageQueue       │        │        │    ✓    │    ✓     │
+│ activateQueue     │        │        │    ✓    │    ✓     │
+├───────────────────┼────────┼────────┼─────────┼──────────┤
+│ Rides                                                     │
+├───────────────────┼────────┼────────┼─────────┼──────────┤
+│ requestRide       │   ✓    │   ✓    │    ✓    │    ✓     │
+│ cancelOwnRide     │   ✓    │   ✓    │    ✓    │    ✓     │
+│ cancelAnyRide     │        │        │    ✓    │    ✓     │
+│ updateRideStatus  │        │   ✓    │    ✓    │    ✓     │
+│ assignDriver      │        │        │    ✓    │    ✓     │
+│ completeRide      │        │   ✓    │    ✓    │    ✓     │
+├───────────────────┼────────┼────────┼─────────┼──────────┤
+│ Driver                                                    │
+├───────────────────┼────────┼────────┼─────────┼──────────┤
+│ viewSchedules     │        │   ✓    │    ✓    │    ✓     │
+│ createSchedule    │        │        │    ✓    │    ✓     │
+│ updateOwnSchedule │        │   ✓    │    ✓    │    ✓     │
+│ updateAnySchedule │        │        │    ✓    │    ✓     │
+│ uploadPDF         │        │        │    ✓    │    ✓     │
+│ parsePDF          │        │        │    ✓    │    ✓     │
+└───────────────────┴────────┴────────┴─────────┴──────────┘
+```
+
+## Simplified Authorization Middleware
+
+```
+┌───────────────────────────────────────────────────────────┐
+│ AuthMiddleware                                            │
+├───────────────────────────────────────────────────────────┤
+│ Methods:                                                  │
+│ + authenticate(req, res, next)                            │
+│   - Extracts and verifies JWT                             │
+│   - Attaches user to request object                       │
+│   - Passes to next middleware or returns 401              │
+│                                                           │
+│ + authorize(requiredRoles)                                │
+│   - Takes array of required roles                         │
+│   - Returns middleware function that checks user roles    │
+│   - Passes to next middleware or returns 403              │
+│                                                           │
+│ + authorizeOrganization(req, res, next)                   │
+│   - Ensures user belongs to the requested organization    │
+│   - Checks if user has appropriate role in organization   │
+│   - Used for org-specific resources                       │
+└───────────────────────────────────────────────────────────┘
+```
+
+## Direct Permission Checking for Embedded Documents
+
+```
+┌───────────────────────────────────────────────────────────┐
+│ Permission Check for Embedded Documents                   │
+├───────────────────────────────────────────────────────────┤
+│ // Using direct object access from cache                  │
+│ function canAccessRide(user, organization, rideId) {      │
+│   // Check if superuser or officer (fast path)            │
+│   if (user.roles.includes('superuser') ||                 │
+│       organization.officerIds.includes(user._id)) {       │
+│     return true;                                          │
+│   }                                                       │
+│                                                           │
+│   // Find the ride in the organization's queue            │
+│   const ride = organization.queue.rides.find(             │
+│     r => r._id.toString() === rideId.toString()           │
+│   );                                                      │
+│                                                           │
+│   if (!ride) return false;                                │
+│                                                           │
+│   // Check if driver assigned to this ride                │
+│   if (user.roles.includes('driver') &&                    │
+│       ride.driver && ride.driver.userId.equals(user._id)) {│
+│     return true;                                          │
+│   }                                                       │
+│                                                           │
+│   // Check if user is a passenger in this ride            │
+│   if (ride.userIds.some(id => id.equals(user._id))) {     │
+│     return true;                                          │
+│   }                                                       │
+│                                                           │
+│   return false;                                           │
+│ }                                                         │
+└───────────────────────────────────────────────────────────┘
+```
+
+## Permission Service with Direct Object Access
+
+```
+┌───────────────────────────────────────────────────────────┐
+│ PermissionService                                         │
+├───────────────────────────────────────────────────────────┤
+│ constructor(cacheService) {                               │
+│   this.cacheService = cacheService;                       │
+│ }                                                         │
+│                                                           │
+│ async hasRole(userId, orgId, role) {                      │
+│   // Get user                                             │
+│   const user = await User.findById(userId);               │
+│   if (!user) return false;                                │
+│                                                           │
+│   // Get organization from cache or database              │
+│   let org = this.cacheService.getOrganization(orgId);     │
+│   if (!org) {                                             │
+│     org = await Organization.findById(orgId);             │
+│     if (org) {                                            │
+│       this.cacheService.setOrganization(orgId, org);      │
+│     }                                                     │
+│   }                                                       │
+│   if (!org) return false;                                 │
+│                                                           │
+│   // Check role                                           │
+│   if (typeof role === 'string') {                         │
+│     if (role === 'superuser' && org.superuserId.equals(userId)) {│
+│       return true;                                        │
+│     }                                                     │
+│     if (role === 'officer' && org.officerIds.some(       │
+│       id => id.equals(userId)                             │
+│     )) {                                                  │
+│       return true;                                        │
+│     }                                                     │
+│     if (user.roles.includes(role)) {                      │
+│       return true;                                        │
+│     }                                                     │
+│   } else if (Array.isArray(role)) {                       │
+│     // Check if user has any of the roles                 │
+│     if (role.includes('superuser') && org.superuserId.equals(userId)) {│
+│       return true;                                        │
+│     }                                                     │
+│     if (role.includes('officer') && org.officerIds.some(  │
+│       id => id.equals(userId)                             │
+│     )) {                                                  │
+│       return true;                                        │
+│     }                                                     │
+│     for (const r of role) {                               │
+│       if (user.roles.includes(r)) {                       │
+│         return true;                                      │
+│       }                                                   │
+│     }                                                     │
+│   }                                                       │
+│                                                           │
+│   return false;                                           │
+│ }                                                         │
+│                                                           │
+│ async canAccessEvent(userId, orgId, eventId) {            │
+│   // Get user                                             │
+│   const user = await User.findById(userId);               │
+│   if (!user) return false;                                │
+│                                                           │
+│   // Get organization from cache or database              │
+│   let org = this.cacheService.getOrganization(orgId);     │
+│   if (!org) {                                             │
+│     org = await Organization.findById(orgId);             │
+│     if (org) {                                            │
+│       this.cacheService.setOrganization(orgId, org);      │
+│     }                                                     │
+│   }                                                       │
+│   if (!org) return false;                                 │
+│                                                           │
+│   // Check if superuser or officer                        │
+│   if (org.superuserId.equals(userId) ||                   │
+│       org.officerIds.some(id => id.equals(userId))) {     │
+│     return true;                                          │
+│   }                                                       │
+│                                                           │
+│   // Check if member of organization                      │
+│   if (org.memberIds.some(id => id.equals(userId))) {      │
+│     // Members can view events                            │
+│     return true;                                          │
+│   }                                                       │
+│                                                           │
+│   return false;                                           │
+│ }                                                         │
+│                                                           │
+│ async canManageRide(userId, orgId, rideId) {              │
+│   // Get user                                             │
+│   const user = await User.findById(userId);               │
+│   if (!user) return false;                                │
+│                                                           │
+│   // Get organization from cache or database              │
+│   let org = this.cacheService.getOrganization(orgId);     │
+│   if (!org) {                                             │
+│     org = await Organization.findById(orgId);             │
+│     if (org) {                                            │
+│       this.cacheService.setOrganization(orgId, org);      │
+│     }                                                     │
+│   }                                                       │
+│   if (!org) return false;                                 │
+│                                                           │
+│   // Check if superuser or officer (can manage all rides) │
+│   if (org.superuserId.equals(userId) ||                   │
+│       org.officerIds.some(id => id.equals(userId))) {     │
+│     return true;                                          │
+│   }                                                       │
+│                                                           │
+│   // Find the ride                                        │
+│   const ride = org.queue.rides.find(                      │
+│     r => r._id.toString() === rideId.toString()           │
+│   );                                                      │
+│                                                           │
+│   if (!ride) return false;                                │
+│                                                           │
+│   // Check if user is the assigned driver                 │
+│   if (user.roles.includes('driver') &&                    │
+│       ride.driver && ride.driver.userId.equals(userId)) { │
+│     return true;                                          │
+│   }                                                       │
+│                                                           │
+│   // Check if user is the ride requestor                  │
+│   if (ride.requestedBy && ride.requestedBy.equals(userId)) {│
+│     return true;                                          │
+│   }                                                       │
+│                                                           │
+│   return false;                                           │
+│ }                                                         │
+└───────────────────────────────────────────────────────────┘
+```
+
+This simplified permission system leverages direct object access through the cache service, making it straightforward to check permissions for embedded documents without complex abstractions.
