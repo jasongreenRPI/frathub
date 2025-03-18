@@ -5,6 +5,7 @@ const {
   request,
   app,
 } = require("./setup");
+const Organization = require("../database/Schemas/organization");
 
 describe("Organization Routes", () => {
   let adminUser;
@@ -15,7 +16,7 @@ describe("Organization Routes", () => {
 
   beforeEach(async () => {
     // Create admin user
-    adminUser = await createTestUser({ role: "superuser" });
+    adminUser = await createTestUser({}, "admin");
     adminToken = await getAuthToken(adminUser);
 
     // Create regular user
@@ -50,6 +51,9 @@ describe("Organization Routes", () => {
 
       expect(response.status).toBe(403);
       expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe(
+        "Access denied. Insufficient permissions."
+      );
     });
   });
 
@@ -80,6 +84,9 @@ describe("Organization Routes", () => {
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe(
+        "Organization with this name already exists"
+      );
     });
   });
 
@@ -107,6 +114,9 @@ describe("Organization Routes", () => {
 
       expect(response.status).toBe(403);
       expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe(
+        "Access denied. You do not belong to this organization."
+      );
     });
   });
 
@@ -134,6 +144,9 @@ describe("Organization Routes", () => {
 
       expect(response.status).toBe(403);
       expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe(
+        "Access denied. You do not belong to this organization."
+      );
     });
   });
 
@@ -158,6 +171,9 @@ describe("Organization Routes", () => {
 
       expect(response.status).toBe(403);
       expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe(
+        "Access denied. Insufficient permissions."
+      );
     });
   });
 
@@ -165,7 +181,7 @@ describe("Organization Routes", () => {
     it("should regenerate organization key (superuser only)", async () => {
       const response = await request(app)
         .post(`/api/organizations/${testOrg._id}/regenerate-key`)
-        .set("Authorization", `Bearer ${userToken}`)
+        .set("Authorization", `Bearer ${adminToken}`)
         .send({
           key: "newkey123",
         });
@@ -176,21 +192,18 @@ describe("Organization Routes", () => {
     });
 
     it("should not allow non-superuser to regenerate key", async () => {
-      const regularUser2 = await createTestUser({
-        email: "regular2@example.com",
-        username: "regularuser2",
-      });
-      const regularToken2 = await getAuthToken(regularUser2);
-
       const response = await request(app)
         .post(`/api/organizations/${testOrg._id}/regenerate-key`)
-        .set("Authorization", `Bearer ${regularToken2}`)
+        .set("Authorization", `Bearer ${userToken}`)
         .send({
           key: "newkey123",
         });
 
       expect(response.status).toBe(403);
       expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe(
+        "Access denied. Insufficient permissions."
+      );
     });
   });
 

@@ -15,7 +15,7 @@ describe("User Routes", () => {
 
   beforeEach(async () => {
     // Create admin user
-    adminUser = await createTestUser({ role: "superuser" });
+    adminUser = await createTestUser({ role: "superuser" }, "admin");
     adminToken = await getAuthToken(adminUser);
 
     // Create regular user

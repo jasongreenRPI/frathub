@@ -37,26 +37,54 @@ afterEach(async () => {
 afterAll(async () => {
   await mongoose.disconnect();
   await mongoServer.stop();
-  server.close();
+  if (server) {
+    server.close();
+  }
 });
 
 // Helper function to create a test user
-const createTestUser = async (userData = {}) => {
-  const defaultUser = {
-    email: "test@example.com",
-    password: "password123",
-    username: "testuser",
-    firstName: "Test",
-    lastName: "User",
-    role: "user",
-    ...userData,
-  };
+const createTestUser = async (userData = {}, type = "user") => {
+  let user;
+  if (type === "user") {
+    user = {
+      email: "test@example.com",
+      password: "password123",
+      username: "testuser",
+      firstName: "Test",
+      lastName: "User",
+      role: "user",
+      ...userData,
+    };
+  } else if (type === "admin") {
+    user = {
+      email: "admin@example.com",
+      password: "password123",
+      username: "adminuser",
+      firstName: "Admin",
+      lastName: "User",
+      role: "superuser",
+      ...userData,
+    };
+  } else if (type === "officer") {
+    user = {
+      email: "officer@example.com",
+      password: "password123",
+      username: "officeruser",
+      firstName: "Officer",
+      lastName: "User",
+      role: "officer",
+      ...userData,
+    };
+  }
 
-  return await User.signUp(defaultUser.email, defaultUser.password, {
-    username: defaultUser.username,
-    firstName: defaultUser.firstName,
-    lastName: defaultUser.lastName,
-    role: defaultUser.role,
+  // Ensure role is not overridden by userData
+  const { role, ...restUserData } = userData;
+  return await User.signUp(user.email, user.password, {
+    username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    role: user.role,
+    ...restUserData,
   });
 };
 

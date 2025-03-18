@@ -47,28 +47,35 @@ app.use("/api/users", userRoutes);
 app.use(errorHandler);
 
 // Server Activation
-const server = app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+let server;
+if (process.env.NODE_ENV !== "test") {
+  server = app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 
 // Connect to Database
-connectDB();
+if (process.env.NODE_ENV !== "test") {
+  connectDB();
+}
 
 // Graceful Shutdown Handlers
-process.on("unhandledRejection", (err) => {
-  console.log("UNHANDLED REJECTION! 💥 Shutting down...");
-  console.log(err.name, err.message);
-  server.close(() => {
-    process.exit(1);
+if (process.env.NODE_ENV !== "test") {
+  process.on("unhandledRejection", (err) => {
+    console.log("UNHANDLED REJECTION! 💥 Shutting down...");
+    console.log(err.name, err.message);
+    server.close(() => {
+      process.exit(1);
+    });
   });
-});
 
-process.on("SIGTERM", () => {
-  console.log("👋 SIGTERM RECEIVED. Shutting down gracefully");
-  server.close(() => {
-    console.log("💥 Process terminated!");
+  process.on("SIGTERM", () => {
+    console.log("👋 SIGTERM RECEIVED. Shutting down gracefully");
+    server.close(() => {
+      console.log("💥 Process terminated!");
+    });
   });
-});
+}
 
 module.exports = { app, server };
 
