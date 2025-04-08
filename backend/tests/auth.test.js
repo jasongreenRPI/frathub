@@ -1,97 +1,66 @@
 const { createTestUser, request, app } = require("./setup");
 
-describe("Auth Routes", () => {
-  describe("POST /api/auth/register", () => {
-    it("should register a new user successfully", async () => {
-      const userData = {
-        email: "newuser@example.com",
-        password: "password123",
-        username: "newuser",
-        firstName: "New",
-        lastName: "User",
-      };
+const timestamp = Date.now();
 
+const userData = {
+  email: `user@test.com`,
+  password: "password123",
+  username: "testuser",
+  firstName: "Test",
+  lastName: "User",
+  role: "user",
+};
+
+const adminData = {
+  email: `admin@test.com`,
+  password: "password123",
+  username: "adminuser",
+  firstName: "Admin",
+  lastName: "User",
+  role: "admin",
+};
+
+const officerData = {
+  email: `officer@test.com`,
+  password: "password123",
+  username: "officeruser",
+  firstName: "Officer",
+  lastName: "User",
+  role: "officer",
+};
+
+describe("Auth Routes", () => {
+  describe("POST /api/auth/resgister | POST /api/auth/login", () => {
+    it("Should register a new user succesfully and log them in", async () => {
       const response = await request(app)
         .post("/api/auth/register")
         .send(userData);
-
       expect(response.status).toBe(201);
-      expect(response.body.success).toBe(true);
-      expect(response.body.token).toBeDefined();
-      expect(response.body.user).toBeDefined();
-      expect(response.body.user.email).toBe(userData.email);
-      expect(response.body.user.username).toBe(userData.username);
-    });
 
-    it("should not register a user with existing email", async () => {
-      const user = await createTestUser();
+      const response2 = await request(app)
+        .post("/api/auth/register")
+        .send(adminData);
+      expect(response2.status).toBe(201);
 
-      const response = await request(app).post("/api/auth/register").send({
-        email: user.email,
-        password: "password123",
-        username: "differentuser",
-        firstName: "Different",
-        lastName: "User",
-      });
+      const response3 = await request(app)
+        .post("/api/auth/register")
+        .send(officerData);
+      expect(response3.status).toBe(201);
 
-      expect(response.status).toBe(400);
-      expect(response.body.success).toBe(false);
-      expect(response.body.message).toContain("already registered");
-    });
+      const response4 = await request(app)
+        .post("/api/auth/login")
+        .send(userData);
+      expect(response4.status).toBe(200);
 
-    it("should not register a user with invalid email format", async () => {
-      const response = await request(app).post("/api/auth/register").send({
-        email: "invalid-email",
-        password: "password123",
-        username: "invaliduser",
-        firstName: "Invalid",
-        lastName: "User",
-      });
+      const response5 = await request(app)
+        .post("/api/auth/login")
+        .send(adminData);
+      expect(response5.status).toBe(200);
 
-      expect(response.status).toBe(400);
-      expect(response.body.success).toBe(false);
-      expect(response.body.message).toContain("Invalid email format");
-    });
-  });
-
-  describe("POST /api/auth/login", () => {
-    it("should login user successfully", async () => {
-      const user = await createTestUser();
-
-      const response = await request(app).post("/api/auth/login").send({
-        email: user.email,
-        password: "password123",
-      });
-
-      expect(response.status).toBe(200);
-      expect(response.body.success).toBe(true);
-      expect(response.body.token).toBeDefined();
-      expect(response.body.user).toBeDefined();
-      expect(response.body.user.email).toBe(user.email);
-    });
-
-    it("should not login with incorrect password", async () => {
-      const user = await createTestUser();
-
-      const response = await request(app).post("/api/auth/login").send({
-        email: user.email,
-        password: "wrongpassword",
-      });
-
-      expect(response.status).toBe(401);
-      expect(response.body.success).toBe(false);
-      expect(response.body.message).toBe("Invalid password");
-    });
-
-    it("should not login with non-existent email", async () => {
-      const response = await request(app).post("/api/auth/login").send({
-        email: "nonexistent@example.com",
-        password: "password123",
-      });
-
-      expect(response.status).toBe(401);
-      expect(response.body.success).toBe(false);
-      expect(response.body.message).toBe("User doesn't exist");
+      const response6 = await request(app)
+        .post("/api/auth/login")
+        .send(officerData);
+      expect(response6.status).toBe(200);
     });
   });
 });

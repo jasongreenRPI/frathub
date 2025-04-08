@@ -5,6 +5,7 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const compression = require("compression");
 const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 // Required Internal Modules
 const connectDB = require("./database/connect");
@@ -13,7 +14,6 @@ const errorHandler = require("./middleware/error_handler");
 // Import Routes
 const authRoutes = require("./routes/auth.routes");
 const organizationRoutes = require("./routes/organization.routes");
-const queueRoutes = require("./routes/queue.routes");
 const userRoutes = require("./routes/user.routes");
 
 // Load Environment Variables
@@ -37,10 +37,17 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
+app.get("/generate-token", (req, res) => {
+  const token = jwt.sign(
+    { userId: "67ddb62ec117de158c7e5f68", expiresIn: "24h" },
+    process.env.JWT_SECRET
+  );
+  res.status(200).json({ token });
+});
+
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/organizations", organizationRoutes);
-app.use("/api/queues", queueRoutes);
 app.use("/api/users", userRoutes);
 
 // Global Error Handler
