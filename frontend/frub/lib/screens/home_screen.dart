@@ -3,6 +3,7 @@ import '../services/user_service.dart';
 import 'ride_screen.dart';
 import 'user_profile_screen.dart';
 import 'login_screen.dart';
+import 'events_screen.dart'; // Import the new EventsScreen
 import '/screens/admin/ride_admin_screens.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -43,14 +44,15 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       const RideScreen(),
+      const EventsScreen(isAdmin: true), // Add this line for the Events tab
       const UserProfileScreen(),
     ];
-    
-    // Add admin page if user is admin
-    if (_isAdmin) {
-      _pages.add(const RideAdminScreen());
-    }
-    
+  
+  // Add admin page if user is admin
+  if (_isAdmin) {
+    _pages.add(const RideAdminScreen());
+  }
+      
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 78, 14, 89),
       appBar: AppBar(
@@ -83,49 +85,52 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-  currentIndex: _selectedIndex,
-  onTap: (index) {
-    // If the admin tab is tapped and it exists
-    if (_isAdmin && index == 3) {
-      setState(() {
-        _selectedIndex = index;
-      });
-    }
-    
-    // For other tabs
-    else if (index < 3) {
-      setState(() {
-        _selectedIndex = index;
-      });
-    }
-  },
-  // Add this line to always show the labels
-  type: BottomNavigationBarType.fixed,
-  // This ensures labels are always visible
-  showSelectedLabels: true,
-  showUnselectedLabels: true,
-  items: [
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.home),
-      label: 'Home',
-    ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.directions_car),
-      label: 'Ride',
-    ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.person),
-      label: 'Profile',
-    ),
-    if (_isAdmin)
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.admin_panel_settings),
-        label: 'Admin',
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          // If the admin tab is tapped and it exists
+          if (_isAdmin && index == _pages.length - 1) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          }
+          // For other tabs
+          else if (index < (_isAdmin ? _pages.length - 1 : _pages.length)) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          }
+        },
+        // Add this line to always show the labels
+        type: BottomNavigationBarType.fixed,
+        // This ensures labels are always visible
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        items: [
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.directions_car),
+            label: 'Ride',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.event),  // Icon for Events tab
+            label: 'Events',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+          if (_isAdmin)
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.admin_panel_settings),
+              label: 'Admin',
+            ),
+        ],
+        selectedItemColor: Colors.purple[800],
+        unselectedItemColor: Colors.grey[600],
       ),
-  ],
-  selectedItemColor: Colors.purple[800],
-  unselectedItemColor: Colors.grey[600], // This sets the color for unselected items
-),
       floatingActionButton: _isAdmin ? FloatingActionButton(
         backgroundColor: Colors.purple[800],
         foregroundColor: Colors.white,

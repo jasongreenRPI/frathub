@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/ride_models.dart';
 import '../../services/ride_service.dart';
+import '../admin/events_admin_screen.dart';  // If in a different directory
 
 /// Screen for administrators to manage ride-sharing functionality
 /// Includes tabs for queue management, driver status, and ride supervision
@@ -28,8 +29,7 @@ class _RideAdminScreenState extends State<RideAdminScreen> with SingleTickerProv
   void initState() {
     super.initState();
     // Initialize tab controller with 3 tabs: QUEUE, DRIVERS, RIDES
-    _tabController = TabController(length: 3, vsync: this);
-    
+  _tabController = TabController(length: 4, vsync: this); // Change from 3 to 4    
     // Load dummy data if queue is empty (for testing/demo purposes)
     if (_rideService.queues.isEmpty) {
       _rideService.initWithDummyData();
@@ -87,7 +87,7 @@ class _RideAdminScreenState extends State<RideAdminScreen> with SingleTickerProv
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ride Administration'),
+        title: const Text('Ride And Event Administration'),
         backgroundColor: const Color(0xFF4B0082), // Deep purple color
         bottom: TabBar(
           controller: _tabController,
@@ -98,6 +98,8 @@ class _RideAdminScreenState extends State<RideAdminScreen> with SingleTickerProv
             Tab(text: 'QUEUE'),
             Tab(text: 'DRIVERS'),
             Tab(text: 'RIDES'),
+            Tab(text: 'EVENTS'), // Add this new tab
+
           ],
         ),
       ),
@@ -107,27 +109,33 @@ class _RideAdminScreenState extends State<RideAdminScreen> with SingleTickerProv
           _buildQueueTab(),
           _buildDriversTab(),
           _buildRidesTab(),
+          const EventsAdminScreen(),
         ],
       ),
-      // Floating action button with different actions based on active tab
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF4B0082),
-        onPressed: () {
-          // Different action for each tab
-          switch (_tabController.index) {
-            case 0: // Queue tab
-              _showAddQueueDialog();
-              break;
-            case 1: // Drivers tab
-              _showAddDriverDialog();
-              break;
-            case 2: // Rides tab
-              _showCreateRideDialog();
-              break;
-          }
-        },
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+     floatingActionButton: FloatingActionButton(
+      backgroundColor: const Color(0xFF4B0082),
+      onPressed: () {
+        // Different action for each tab
+        switch (_tabController.index) {
+          case 0: // Queue tab
+            _showAddQueueDialog();
+            break;
+          case 1: // Drivers tab
+            _showAddDriverDialog();
+            break;
+          case 2: // Rides tab
+            _showCreateRideDialog();
+            break;
+          case 3: // Events tab
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const EventsAdminScreen()),
+            );
+            break;
+        }
+      },
+      child: const Icon(Icons.add, color: Colors.white),
+    ),
     );
   }
   
