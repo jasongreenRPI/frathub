@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/user_service.dart';
 
+
+/// UserProfileScreen widget that displays and allows editing of user profile information.
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
 
@@ -38,6 +40,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     _positionController = TextEditingController(text: user?.position ?? '');
   }
   
+
+  /// Dispose method to clean up controllers
   @override
   void dispose() {
     _nameController.dispose();
@@ -49,6 +53,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     super.dispose();
   }
 
+
+  // Build method to create the UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -154,6 +160,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
   
+  // Helper methods to build UI components
   Widget _buildInputLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -167,6 +174,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
   
+
+  // Helper method to build text fields
   Widget _buildTextField({
     required TextEditingController controller,
     bool isPassword = false,
@@ -210,6 +219,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
   
+
+  // Show date picker dialog
   void _showDatePicker() async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -235,9 +246,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     }
   }
   
+  // Show position dropdown
   void _showPositionDropdown() {
     final positions = ['President', 'Vice President', 'Treasurer', 'Secretary', 'Member'];
     
+    // Show bottom sheet with list of positions
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -280,6 +293,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
   
+
+  // Save profile changes
   void _saveProfile() {
     // Update user data in the service
     _userService.updateProfile(

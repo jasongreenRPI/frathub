@@ -1,9 +1,9 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:frub/services/user_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../services/events_service.dart';
+
 
 class EventsScreen extends StatefulWidget {
   final bool isAdmin;
@@ -17,17 +17,23 @@ class EventsScreen extends StatefulWidget {
   State<EventsScreen> createState() => _EventsScreenState();
 }
 
+// This class is responsible for managing the state of the EventsScreen
 class _EventsScreenState extends State<EventsScreen> with TickerProviderStateMixin {
+
+  // TabController to manage the tabs in the app bar
   late final TabController _tabController;
   final EventsService _eventsService = EventsService();
   StreamSubscription? _eventsSubscription;
   StreamSubscription? _pollsSubscription;
   StreamSubscription? _formsSubscription;
   
+  // Calendar variables
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   
+
+  // This method is called when the widget is first created
   @override
   void initState() {
     super.initState();
@@ -65,6 +71,7 @@ class _EventsScreenState extends State<EventsScreen> with TickerProviderStateMix
     });
   }
   
+  // This method is called when the widget is disposed
   @override
   void dispose() {
     _eventsSubscription?.cancel();
@@ -74,7 +81,7 @@ class _EventsScreenState extends State<EventsScreen> with TickerProviderStateMix
     super.dispose();
   }
 
-// In EventsScreen.dart - Update _showEventActions method
+// This method is used to show a modal bottom sheet with event actions
 void _showEventActions(Event event) {
   showModalBottomSheet(
     context: context,
@@ -127,20 +134,21 @@ void _showEventActions(Event event) {
               );
             },
           ),
-        // REMOVED: Pin/Unpin option for regular users
-        // REMOVED: Edit option for regular users
       ],
     ),
   );
 }
-// Add these methods to your EventsScreen class
 
+// This method is used to show a dialog for editing an event
 void _showEditEventDialog(Event event) {
+
+  // Create controllers for the text fields
   final titleController = TextEditingController(text: event.title);
   final timeController = TextEditingController(text: event.time);
   final locationController = TextEditingController(text: event.location);
   final descriptionController = TextEditingController(text: event.description);
   
+  // Show the dialog
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
@@ -210,7 +218,7 @@ void _showEditEventDialog(Event event) {
   );
 }
 
-// Add a method to show full recap in a dialog
+// This method is used to show a dialog for deleting an event
 void _showRecapDialog(MapEntry<DateTime, Event> entry) {
   final event = entry.value;
   
@@ -239,6 +247,8 @@ void _showRecapDialog(MapEntry<DateTime, Event> entry) {
   );
 }
 
+
+// This method is used to show a dialog for deleting an event
 void _showDeleteEventDialog(Event event) {
   showDialog(
     context: context,
@@ -275,62 +285,64 @@ void _showDeleteEventDialog(Event event) {
   );
 }
 
-  void _showPollVotingDialog(Poll poll) {
-    String? selectedOption;
-    
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(poll.question),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: poll.options.map((option) => RadioListTile<String>(
-                title: Text(option),
-                value: option,
-                groupValue: selectedOption,
-                onChanged: (value) {
-                  setState(() {
-                    selectedOption = value;
-                  });
-                },
-              )).toList(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                // In a real app, this would submit the vote to the backend
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('You voted: ${selectedOption ?? "No option selected"}'),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
+// This method is used to show a dialog for voting in a poll
+void _showPollVotingDialog(Poll poll) {
+  // Create a variable to hold the selected option
+  // This will be used to manage the state of the selected option
+  String? selectedOption;
+  showDialog(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) => AlertDialog(
+        title: Text(poll.question),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: poll.options.map((option) => RadioListTile<String>(
+              title: Text(option),
+              value: option,
+              groupValue: selectedOption,
+              onChanged: (value) {
+                setState(() {
+                  selectedOption = value;
+                });
               },
-              child: const Text('Submit'),
-            ),
-          ],
+            )).toList(),
+          ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // In a real app, this would submit the vote to the backend
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('You voted: ${selectedOption ?? "No option selected"}'),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
+            child: const Text('Submit'),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   
 
-  // In EventsScreen.dart - Update the form dialog method
-
+// This method is used to show a dialog for filling out a form
 void _showFormDetailsDialog(EventForm form) {
   final answerController = TextEditingController();
   final formKey = GlobalKey<FormState>();
   bool isSubmitting = false;
   
+  // Show the dialog
   showDialog(
     context: context,
     builder: (context) => StatefulBuilder(
@@ -428,7 +440,7 @@ void _showFormDetailsDialog(EventForm form) {
 }
   
 
-// Add a method to show event details in a dialog
+// This method is used to show a dialog for viewing event details
 void _showEventDetailsDialog(MapEntry<DateTime, Event> entry) {
   final event = entry.value;
   
@@ -474,8 +486,9 @@ void _showEventDetailsDialog(MapEntry<DateTime, Event> entry) {
 
 
 
+  // This method is used to show a dialog for viewing poll details
   Widget build(BuildContext context) {
-    print('EventsScreen - Total events: ${_eventsService.getAllEvents().length}');
+
   return Scaffold(
     backgroundColor: const Color.fromARGB(255, 78, 14, 89),
     appBar: AppBar(
@@ -493,6 +506,7 @@ void _showEventDetailsDialog(MapEntry<DateTime, Event> entry) {
         ],
       ),
     ),
+    // Create a TabBarView to display the content of each tab
     body: TabBarView(
       controller: _tabController,
       children: [
@@ -913,48 +927,47 @@ void _showEventDetailsDialog(MapEntry<DateTime, Event> entry) {
                                             ),
                                           ],
                                           const SizedBox(height: 8),
-                                          // In the Events List tab, update the trailing buttons for events
-// Replace the existing Pin/Unpin TextButton with just a View button
-Row(
-  mainAxisAlignment: MainAxisAlignment.end,
-  children: [
-    TextButton.icon(
-      icon: Icon(
-        Icons.calendar_today,
-        color: entry.value.isAddedToCalendar 
-            ? Colors.green 
-            : null,
-        size: 16,
-      ),
-      label: Text(
-        entry.value.isAddedToCalendar 
-            ? 'Added' 
-            : 'Add'
-      ),
-      onPressed: () {
-        setState(() {
-          _eventsService.toggleEventCalendar(entry.value.id);
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              entry.value.isAddedToCalendar 
-                  ? 'Added to calendar' 
-                  : 'Removed from calendar'
-            ),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      },
-    ),
-    // REMOVED: Pin/Unpin button
-    TextButton.icon(
-      icon: const Icon(Icons.visibility, size: 16),
-      label: const Text('View'),
-      onPressed: () => _showEventActions(entry.value),
-    ),
-  ],
-),
+                                          // Replace the existing Pin/Unpin TextButton with just a View button
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            children: [
+                                              TextButton.icon(
+                                                icon: Icon(
+                                                  Icons.calendar_today,
+                                                  color: entry.value.isAddedToCalendar 
+                                                      ? Colors.green 
+                                                      : null,
+                                                  size: 16,
+                                                ),
+                                                label: Text(
+                                                  entry.value.isAddedToCalendar 
+                                                      ? 'Added' 
+                                                      : 'Add'
+                                                ),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    _eventsService.toggleEventCalendar(entry.value.id);
+                                                  });
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        entry.value.isAddedToCalendar 
+                                                            ? 'Added to calendar' 
+                                                            : 'Removed from calendar'
+                                                      ),
+                                                      duration: const Duration(seconds: 2),
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                              // REMOVED: Pin/Unpin button
+                                              TextButton.icon(
+                                                icon: const Icon(Icons.visibility, size: 16),
+                                                label: const Text('View'),
+                                                onPressed: () => _showEventActions(entry.value),
+                                              ),
+                                            ],
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -962,7 +975,6 @@ Row(
                               .toList(),
                         ),
                 ),
-                
                 // Add Event Recaps Section
                 const SizedBox(height: 24),
                 if (_eventsService.getEventsWithRecaps().isNotEmpty) ...[
@@ -1062,7 +1074,7 @@ Row(
             ),
           ),
           
-          // Polls & Forms Tab (Updated to include pinned sections)
+        // Polls & Forms Tab (Updated to include pinned sections)
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: SingleChildScrollView(
@@ -1236,7 +1248,7 @@ Widget _buildPollCard(Poll poll) {
   );
 }
 
-// Update the Event Recap card
+// Recap card for events
 Widget _buildRecapCard(MapEntry<DateTime, Event> entry) {
   final event = entry.value;
   
@@ -1289,7 +1301,7 @@ Widget _buildRecapCard(MapEntry<DateTime, Event> entry) {
   );
 }
 
-// Update the event card in EventsScreen and EventsAdminScreen
+// Recap card for events
 Widget _buildEventCard(MapEntry<DateTime, Event> entry) {
   final event = entry.value;
   
@@ -1310,7 +1322,7 @@ Widget _buildEventCard(MapEntry<DateTime, Event> entry) {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Event title - make sure it wraps properly
+          // Event title
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -1338,7 +1350,7 @@ Widget _buildEventCard(MapEntry<DateTime, Event> entry) {
           ),
           const SizedBox(height: 8),
           
-          // Time - make sure it fits
+          // Time 
           Text(
             event.time,
             style: const TextStyle(fontSize: 14),
@@ -1348,7 +1360,7 @@ Widget _buildEventCard(MapEntry<DateTime, Event> entry) {
           
           const SizedBox(height: 4),
           
-          // Location - make sure it fits
+          // Location
           Text(
             event.location,
             style: const TextStyle(fontSize: 14),
@@ -1373,6 +1385,7 @@ Widget _buildEventCard(MapEntry<DateTime, Event> entry) {
   );
 }
 
+// Form card for events
 Widget _buildFormCard(EventForm form) {
   return Card(
     margin: const EdgeInsets.only(bottom: 16),
@@ -1436,6 +1449,5 @@ Widget _buildFormCard(EventForm form) {
       ),
     ),
   );
-  
 }
 }

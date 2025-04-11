@@ -1,5 +1,6 @@
 // This file manages user data across the app
 
+// Class to represent a user
 class User {
   final String email;
   final String password;
@@ -18,6 +19,7 @@ class User {
   });
 }
 
+// UserService class to manage user-related operations
 class UserService {
   // Singleton pattern
   static final UserService _instance = UserService._internal();

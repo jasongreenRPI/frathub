@@ -10,7 +10,10 @@ class CreateAccountScreen extends StatefulWidget {
 }
 
 class _CreateAccountScreenState extends State<CreateAccountScreen> {
+  // Form key to validate the form
   final _formKey = GlobalKey<FormState>();
+
+  // Controllers for the text fields
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -18,6 +21,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   // Get access to our user service
   final _userService = UserService();
 
+  // Function to create a new account
   void _createAccount() {
     if (_formKey.currentState!.validate()) {
       // Register the new user
@@ -42,6 +46,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     }
   }
 
+  // Function to check if the email is already registered
   @override
   Widget build(BuildContext context) {
     return Scaffold(

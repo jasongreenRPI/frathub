@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'login_screen.dart';
 
+
+/// SplashScreen widget that displays a loading screen with a logo and a message.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -9,6 +11,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
+
+/// State class for SplashScreen that handles the timer and navigation.
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
@@ -22,6 +26,8 @@ class _SplashScreenState extends State<SplashScreen> {
     });
   }
 
+
+  /// Dispose method to cancel the timer if needed
   @override
   Widget build(BuildContext context) {
     return Scaffold(

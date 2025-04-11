@@ -1,7 +1,7 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import '../../services/events_service.dart';
+
 
 class EventsAdminScreen extends StatefulWidget {
   const EventsAdminScreen({super.key});
@@ -10,6 +10,7 @@ class EventsAdminScreen extends StatefulWidget {
   State<EventsAdminScreen> createState() => _EventsAdminScreenState();
 }
 
+// This class manages the state of the EventsAdminScreen
 class _EventsAdminScreenState extends State<EventsAdminScreen> with TickerProviderStateMixin {
   late final TabController _tabController;
   final EventsService _eventsService = EventsService();
@@ -60,7 +61,7 @@ class _EventsAdminScreenState extends State<EventsAdminScreen> with TickerProvid
     super.dispose();
   }
 
- // In EventsAdminScreen.dart - update the _showAddEventDialog method
+  // Show dialog to add a new event
 void _showAddEventDialog() {
   final titleController = TextEditingController();
   final timeController = TextEditingController();
@@ -211,6 +212,7 @@ void _showAddEventDialog() {
   );
 }
 
+  // Show dialog to create a new poll
   void _showCreatePollDialog() {
     final titleController = TextEditingController();
     final optionsController = TextEditingController();
@@ -295,6 +297,7 @@ void _showAddEventDialog() {
     );
   }
 
+  // Show dialog to create a new form
   void _showCreateFormDialog() {
     final titleController = TextEditingController();
     final descriptionController = TextEditingController();
@@ -378,6 +381,7 @@ void _showAddEventDialog() {
     );
   }
 
+  // Show dialog to add a recap to an event
   void _showAddRecapDialog(Event event) {
     final recapController = TextEditingController(text: event.recap);
     
@@ -420,223 +424,221 @@ void _showAddEventDialog() {
     );
   }
 
-  // In EventsAdminScreen.dart - Update the _showEditEventDialog to ensure proper state update
-void _showEditEventDialog(Event event) {
-  final titleController = TextEditingController(text: event.title);
-  final timeController = TextEditingController(text: event.time);
-  final locationController = TextEditingController(text: event.location);
-  final descriptionController = TextEditingController(text: event.description);
-  
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Edit Event'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'Event Title',
-              ),
-            ),
-            TextField(
-              controller: timeController,
-              decoration: const InputDecoration(
-                labelText: 'Time (e.g., 3:00 PM - 4:00 PM)',
-              ),
-            ),
-            TextField(
-              controller: locationController,
-              decoration: const InputDecoration(
-                labelText: 'Location',
-              ),
-            ),
-            TextField(
-              controller: descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-              ),
-              maxLines: 3,
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () {
-            _eventsService.updateEvent(
-              event.id,
-              title: titleController.text.isEmpty ? event.title : titleController.text,
-              time: timeController.text.isEmpty ? event.time : timeController.text,
-              location: locationController.text.isEmpty ? event.location : locationController.text,
-              description: descriptionController.text.isEmpty ? event.description : descriptionController.text,
-            );
-            
-            Navigator.pop(context);
-            
-            // Force UI update after editing
-            setState(() {});
-            
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Event updated successfully'),
-                duration: Duration(seconds: 2),
-              ),
-            );
-          },
-          child: const Text('Save'),
-        ),
-      ],
-    ),
-  );
-}
-
-  // In EventsAdminScreen.dart - Update the _showDeleteEventDialog to ensure proper state update
- // Update the delete button handler
-  void _showDeleteEventDialog(Event event) {
+  // Show Events in a Dialog
+  void _showEditEventDialog(Event event) {
+    final titleController = TextEditingController(text: event.title);
+    final timeController = TextEditingController(text: event.time);
+    final locationController = TextEditingController(text: event.location);
+    final descriptionController = TextEditingController(text: event.description);
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Event'),
-        content: Text('Are you sure you want to delete "${event.title}"?'),
+        title: const Text('Edit Event'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Event Title',
+                ),
+              ),
+              TextField(
+                controller: timeController,
+                decoration: const InputDecoration(
+                  labelText: 'Time (e.g., 3:00 PM - 4:00 PM)',
+                ),
+              ),
+              TextField(
+                controller: locationController,
+                decoration: const InputDecoration(
+                  labelText: 'Location',
+                ),
+              ),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                ),
+                maxLines: 3,
+              ),
+            ],
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
           TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
             onPressed: () {
-              final wasDeleted = _eventsService.deleteEvent(event.id);
+              _eventsService.updateEvent(
+                event.id,
+                title: titleController.text.isEmpty ? event.title : titleController.text,
+                time: timeController.text.isEmpty ? event.time : timeController.text,
+                location: locationController.text.isEmpty ? event.location : locationController.text,
+                description: descriptionController.text.isEmpty ? event.description : descriptionController.text,
+              );
               
               Navigator.pop(context);
               
+              // Force UI update after editing
+              setState(() {});
+              
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(wasDeleted
-                      ? '${event.title} deleted'
-                      : 'Error: Could not delete event'),
-                  duration: const Duration(seconds: 2),
+                const SnackBar(
+                  content: Text('Event updated successfully'),
+                  duration: Duration(seconds: 2),
                 ),
               );
             },
-            child: const Text('Delete'),
+            child: const Text('Save'),
           ),
         ],
       ),
     );
   }
 
-// In EventsAdminScreen.dart - Add method to view form responses
-
-void _showFormResponsesDialog(EventForm form) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text('${form.title} - Responses (${form.responses.length})'),
-      content: SizedBox(
-        width: double.maxFinite,
-        height: 400,
-        child: form.responses.isEmpty
-            ? const Center(
-                child: Text('No responses yet'),
-              )
-            : ListView.separated(
-                itemCount: form.responses.length,
-                separatorBuilder: (context, index) => const Divider(),
-                itemBuilder: (context, index) {
-                  final response = form.responses[index];
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            response.userName,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            _formatDateTime(response.submittedAt),
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(response.answer),
-                    ],
-                  );
-                },
+  // Update the delete button handler
+    void _showDeleteEventDialog(Event event) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Delete Event'),
+          content: Text('Are you sure you want to delete "${event.title}"?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
               ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Close'),
-        ),
-      ],
-    ),
-  );
-}
-
-// Add a method to show event details in a dialog
-void _showEventDetailsDialog(MapEntry<DateTime, Event> entry) {
-  final event = entry.value;
-  
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text(event.title),
-      content: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Date: ${entry.key.month}/${entry.key.day}/${entry.key.year}'),
-            const SizedBox(height: 8),
-            Text('Time: ${event.time}'),
-            const SizedBox(height: 8),
-            Text('Location: ${event.location}'),
-            const SizedBox(height: 16),
-            Text('Description:'),
-            const SizedBox(height: 4),
-            Text(event.description),
-            if (event.hasRecap) ...[
-              const SizedBox(height: 16),
-              const Text(
-                'Recap:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Text(event.recap ?? ''),
-            ],
+              onPressed: () {
+                final wasDeleted = _eventsService.deleteEvent(event.id);
+                
+                Navigator.pop(context);
+                
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(wasDeleted
+                        ? '${event.title} deleted'
+                        : 'Error: Could not delete event'),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              },
+              child: const Text('Delete'),
+            ),
           ],
         ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Close'),
-        ),
-      ],
-    ),
-  );
-}
+      );
+    }
 
-// Helper method to format date time - place it here
+// Shows form responses in a dialog
+  void _showFormResponsesDialog(EventForm form) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('${form.title} - Responses (${form.responses.length})'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 400,
+          child: form.responses.isEmpty
+              ? const Center(
+                  child: Text('No responses yet'),
+                )
+              : ListView.separated(
+                  itemCount: form.responses.length,
+                  separatorBuilder: (context, index) => const Divider(),
+                  itemBuilder: (context, index) {
+                    final response = form.responses[index];
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              response.userName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              _formatDateTime(response.submittedAt),
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(response.answer),
+                      ],
+                    );
+                  },
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+// Shows event details in a dialog
+  void _showEventDetailsDialog(MapEntry<DateTime, Event> entry) {
+    final event = entry.value;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(event.title),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Date: ${entry.key.month}/${entry.key.day}/${entry.key.year}'),
+              const SizedBox(height: 8),
+              Text('Time: ${event.time}'),
+              const SizedBox(height: 8),
+              Text('Location: ${event.location}'),
+              const SizedBox(height: 16),
+              Text('Description:'),
+              const SizedBox(height: 4),
+              Text(event.description),
+              if (event.hasRecap) ...[
+                const SizedBox(height: 16),
+                const Text(
+                  'Recap:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text(event.recap ?? ''),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+// Helper method to format date time
   String _formatDateTime(DateTime dateTime) {
     final hour = dateTime.hour > 12 ? dateTime.hour - 12 : (dateTime.hour == 0 ? 12 : dateTime.hour);
     final period = dateTime.hour >= 12 ? 'PM' : 'AM';
@@ -644,98 +646,95 @@ void _showEventDetailsDialog(MapEntry<DateTime, Event> entry) {
     return '${dateTime.month}/${dateTime.day} at $hour:$minute $period';
   }
 
-// Update the event card in EventsScreen and EventsAdminScreen
-Widget _buildEventCard(MapEntry<DateTime, Event> entry) {
-  final event = entry.value;
-  
-  return Card(
-    margin: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
-    elevation: 4,
-    // Use different colors based on the source of the event
-    color: event.color.withOpacity(0.2),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-      side: BorderSide(
-        color: event.color,
-        width: 2,
+  // Build the event card widget
+  Widget _buildEventCard(MapEntry<DateTime, Event> entry) {
+    final event = entry.value;
+    
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
+      elevation: 4,
+      // Use different colors based on the source of the event
+      color: event.color.withOpacity(0.2),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: event.color,
+          width: 2,
+        ),
       ),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Event title - make sure it wraps properly
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  event.title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 2, // Limit to 2 lines
-                  overflow: TextOverflow.ellipsis, // Add ellipsis if it overflows
-                ),
-              ),
-              if (event.isPinned)
-                const Padding(
-                  padding: EdgeInsets.only(left: 4.0),
-                  child: Icon(
-                    Icons.push_pin,
-                    color: Colors.red,
-                    size: 20,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Event title - make sure it wraps properly
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    event.title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 2, // Limit to 2 lines
+                    overflow: TextOverflow.ellipsis, // Add ellipsis if it overflows
                   ),
                 ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          
-          // Time - make sure it fits
-          Text(
-            event.time,
-            style: const TextStyle(fontSize: 14),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          
-          const SizedBox(height: 4),
-          
-          // Location - make sure it fits
-          Text(
-            event.location,
-            style: const TextStyle(fontSize: 14),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          
-          // Only show info button for more details
-          Align(
-            alignment: Alignment.centerRight,
-            child: IconButton(
-              icon: const Icon(Icons.info_outline, size: 20),
-              onPressed: () {
-                // Show detailed event info in a dialog
-                _showEventDetailsDialog(entry);
-              },
+                if (event.isPinned)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 4.0),
+                    child: Icon(
+                      Icons.push_pin,
+                      color: Colors.red,
+                      size: 20,
+                    ),
+                  ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            
+            // Time - make sure it fits
+            Text(
+              event.time,
+              style: const TextStyle(fontSize: 14),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            
+            const SizedBox(height: 4),
+            
+            // Location - make sure it fits
+            Text(
+              event.location,
+              style: const TextStyle(fontSize: 14),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            
+            // Only show info button for more details
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                icon: const Icon(Icons.info_outline, size: 20),
+                onPressed: () {
+                  // Show detailed event info in a dialog
+                  _showEventDetailsDialog(entry);
+                },
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-// Update the _buildFormCard method to include a "View Responses" button
+// Build the form card widget
 Widget _buildFormCard(EventForm form) {
   return Card(
-    // ... existing card code ...
     child: Column(
-      // ... existing column code ...
       children: [
-        // ... existing children ...
        const Divider(),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -745,7 +744,6 @@ Widget _buildFormCard(EventForm form) {
               label: Text('Responses (${form.responses.length})'),
               onPressed: () => _showFormResponsesDialog(form),
             ),
-            // ... existing buttons (Edit, Pin/Unpin, Delete) ...
           ],
         ),
       ],
@@ -754,10 +752,11 @@ Widget _buildFormCard(EventForm form) {
 }
 
 
-
+  // The build method constructs the UI for the EventsAdminScreen.
+  // It includes a Scaffold with a purple background, an AppBar with a TabBar,
+  // and a TabBarView to display different sections (Manage Events, Polls & Forms, Event Recaps).
   @override
   Widget build(BuildContext context) {
-  // Debug print to check if events are the same
   print('EventsAdminScreen - Total events: ${_eventsService.getAllEvents().length}');
  return Scaffold(
       backgroundColor: const Color.fromARGB(255, 78, 14, 89),
@@ -767,7 +766,7 @@ Widget _buildFormCard(EventForm form) {
         bottom: TabBar(
           controller: _tabController,
           labelColor: Colors.white,              // Active tab text color
-          unselectedLabelColor: Colors.white70,  // Inactive tab text color (optional)
+          unselectedLabelColor: Colors.white70,  // Inactive tab text color 
           tabs: const [
             Tab(text: 'Manage Events'),
             Tab(text: 'Polls & Forms'),
@@ -872,65 +871,64 @@ Widget _buildFormCard(EventForm form) {
                                   },
                                 ),
                                 TextButton.icon(
-  icon: const Icon(Icons.delete),
-  label: const Text('Delete'),
-  onPressed: () {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Event'),
-        content: Text('Are you sure you want to delete "${entry.value.title}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
-            onPressed: () {
-              // Store the event ID before deletion
-              final eventId = entry.value.id;
-              final eventTitle = entry.value.title;
-              
-              // Attempt to delete the event
-              final wasDeleted = _eventsService.deleteEvent(eventId);
-              
-              // Close the dialog
-              Navigator.pop(context);
-              
-              if (wasDeleted) {
-                // Force UI update
-                setState(() {
-                  // This empty setState forces a rebuild
-                });
-                
-                // Show success message
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('$eventTitle deleted'),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-              } else {
-                // Show error message
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Error: Could not delete $eventTitle'),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-              }
-            },
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-  },
-),
-
+                                  icon: const Icon(Icons.delete),
+                                  label: const Text('Delete'),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text('Delete Event'),
+                                        content: Text('Are you sure you want to delete "${entry.value.title}"?'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(context),
+                                            child: const Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            style: TextButton.styleFrom(
+                                              foregroundColor: Colors.red,
+                                            ),
+                                            onPressed: () {
+                                              // Store the event ID before deletion
+                                              final eventId = entry.value.id;
+                                              final eventTitle = entry.value.title;
+                                              
+                                              // Attempt to delete the event
+                                              final wasDeleted = _eventsService.deleteEvent(eventId);
+                                              
+                                              // Close the dialog
+                                              Navigator.pop(context);
+                                              
+                                              if (wasDeleted) {
+                                                // Force UI update
+                                                setState(() {
+                                                  // This empty setState forces a rebuild
+                                                });
+                                                
+                                                // Show success message
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text('$eventTitle deleted'),
+                                                    duration: const Duration(seconds: 2),
+                                                  ),
+                                                );
+                                              } else {
+                                                // Show error message
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text('Error: Could not delete $eventTitle'),
+                                                    duration: const Duration(seconds: 2),
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                            child: const Text('Delete'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
                               ],
                             ),
                           ],

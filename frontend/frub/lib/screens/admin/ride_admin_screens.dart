@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/ride_models.dart';
 import '../../services/ride_service.dart';
-import '../admin/events_admin_screen.dart';  // If in a different directory
+import '../admin/events_admin_screen.dart';
 
 /// Screen for administrators to manage ride-sharing functionality
 /// Includes tabs for queue management, driver status, and ride supervision
@@ -98,7 +98,7 @@ class _RideAdminScreenState extends State<RideAdminScreen> with SingleTickerProv
             Tab(text: 'QUEUE'),
             Tab(text: 'DRIVERS'),
             Tab(text: 'RIDES'),
-            Tab(text: 'EVENTS'), // Add this new tab
+            Tab(text: 'EVENTS'), 
 
           ],
         ),
@@ -924,7 +924,7 @@ class _RideAdminScreenState extends State<RideAdminScreen> with SingleTickerProv
                 subtitle: Text('${driver.vehicleModel} - ${driver.availableSeats} seats available'),
                 onTap: () {
                   Navigator.pop(context);
-                  // In a real app, this would call an API to assign the driver
+                  // In the real app, this would call an API to assign the driver
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('${ride.userName} assigned to ${driver.name}')),
                   );

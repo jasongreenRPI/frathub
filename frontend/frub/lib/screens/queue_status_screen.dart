@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../models/ride_models.dart';
 import '../services/ride_service.dart';
 
+
+
+// The QueueStatusScreen widget displays the status of a ride queue.
 class QueueStatusScreen extends StatefulWidget {
   final String rideId;
   
@@ -15,6 +18,7 @@ class QueueStatusScreen extends StatefulWidget {
   State<QueueStatusScreen> createState() => _QueueStatusScreenState();
 }
 
+// The _QueueStatusScreenState class manages the state of the QueueStatusScreen widget.
 class _QueueStatusScreenState extends State<QueueStatusScreen> {
   final _rideService = RideService();
   RideRequest? _ride;
@@ -39,6 +43,8 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
     });
   }
   
+
+  // This method is called when the widget is disposed of.
   @override
   void dispose() {
     _refreshTimer?.cancel();
@@ -140,19 +146,12 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
     _allQueueRides = queueRides;
     _isRefreshing = false;
   });
-    
-   // Debug print
-  print('Queue name: ${mainQueue?.name ?? 'None'}');
-  print('Queue length: ${queueRides.length}');
-  for (var ride in queueRides) {
-    print('Queue item: ${ride.userName} - ${ride.destination.name} - position: ${ride.position}');
-  }
   }
   }
   
+  // This method is called when the user taps on the "Leave Queue" button.
   void _cancelRide() {
     if (_ride == null) return;
-    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -176,6 +175,7 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
     );
   }
 
+  // This method is called when the user taps on the "Refresh" button.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -196,6 +196,7 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
     );
   }
   
+  // This method builds the queue details section of the screen.
   Widget _buildQueueDetails() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -251,6 +252,7 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
     );
   }
   
+  // This method builds the list of rides in the queue.
   Widget _buildQueueList() {
   List<RideRequest> displayQueue = List.from(_allQueueRides);
   
@@ -273,6 +275,7 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
     displayQueue.add(userRide);
   }
   
+  // Sort the display queue by position
   if (displayQueue.isEmpty) {
     return Center(
       child: Column(

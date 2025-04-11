@@ -3,6 +3,8 @@ import '../services/user_service.dart';
 import 'home_screen.dart';
 import 'create_account_screen.dart';
 
+
+// The LoginScreen widget is the login page of the app.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -10,6 +12,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
+
+// The _LoginScreenState class manages the state of the LoginScreen widget.
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
@@ -47,6 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  // This method is called when the user taps on the "Create an Account" button.
   void _navigateToCreateAccount() {
     Navigator.push(
       context,
@@ -54,6 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // This method is called when the user taps on the "Login" button.
   @override
   Widget build(BuildContext context) {
     return Scaffold(

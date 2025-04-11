@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
+// Event Model
 class Event {
   final String id;
   String title;
@@ -13,6 +14,7 @@ class Event {
   bool hasRecap;
   String? recap;
 
+  // Constructor
   Event({
     required this.id,
     required this.title,
@@ -35,6 +37,7 @@ class Poll {
   late bool isPinned;
   final DateTime createdAt;
   
+  // Constructor
   Poll({
     required this.id,
     required this.question,
@@ -54,6 +57,7 @@ class EventForm {
   final String prompt; // The form question or prompt
   final List<FormResponse> responses; // Store user responses
   
+  // Constructor
   EventForm({
     required this.id,
     required this.title,
@@ -67,12 +71,14 @@ class EventForm {
     this.responses = responses ?? [];
 }
 
+// Form Response Model
 class FormResponse {
   final String userId;
   final String userName;
   final String answer;
   final DateTime submittedAt;
   
+  // Constructor
   FormResponse({
     required this.userId,
     required this.userName,
@@ -159,7 +165,7 @@ class EventsService {
   // Avoid using colors close to the background color
   if (event.color == Colors.purple) {
     // Use a different default color for better visibility
-    event.color = Colors.orange; // You can choose any bright color
+    event.color = Colors.orange; 
   }
   if (events[date] != null) {
     events[date]!.add(event);
@@ -169,6 +175,7 @@ class EventsService {
   _notifyListeners();
 }
   
+  // Method to pin an event
   void toggleEventPin(String eventId) {
     for (var entry in events.entries) {
       for (var event in entry.value) {
@@ -181,6 +188,7 @@ class EventsService {
     }
   }
   
+  // Method to toggle calendar addition
   void toggleEventCalendar(String eventId) {
     for (var entry in events.entries) {
       for (var event in entry.value) {
@@ -193,6 +201,7 @@ class EventsService {
     }
   }
   
+  // Method to add a recap to an event
   void addRecapToEvent(String eventId, String recap) {
     for (var entry in events.entries) {
       for (var event in entry.value) {
@@ -274,11 +283,14 @@ class EventsService {
     return eventDeleted;
   }
   
+
+  // Methods for Polls and Forms
   void addPoll(Poll poll) {
     polls.add(poll);
     _notifyListeners();
   }
   
+  // Method to pin a poll
   void togglePollPin(String pollId) {
     for (var poll in polls) {
       if (poll.id == pollId) {
@@ -289,6 +301,7 @@ class EventsService {
     }
   }
   
+  // Method to update an existing poll
   bool deletePoll(String pollId) {
     final initialLength = polls.length;
     polls.removeWhere((poll) => poll.id == pollId);
@@ -301,11 +314,13 @@ class EventsService {
     return removed;
   }
   
+  // Method to update an existing poll
   void addForm(EventForm form) {
     forms.add(form);
     _notifyListeners();
   }
   
+  // Method to pin a form
   void toggleFormPin(String formId) {
     for (var form in forms) {
       if (form.id == formId) {
@@ -316,6 +331,7 @@ class EventsService {
     }
   }
   
+  // Method to update an existing form
   bool deleteForm(String formId) {
     final initialLength = forms.length;
     forms.removeWhere((form) => form.id == formId);
@@ -328,6 +344,7 @@ class EventsService {
     return removed;
   }
 
+  // Method to submit a form response
   void submitFormResponse(String formId, String userId, String userName, String answer) {
   // Find the form
   final formIndex = forms.indexWhere((form) => form.id == formId);
@@ -348,18 +365,21 @@ class EventsService {
   }
 }
   
+  // Method to get events for a specific day
   List<Event> getEventsForDay(DateTime day) {
     // Normalize the date to avoid time comparison issues
     final normalizedDay = DateTime(day.year, day.month, day.day);
     return events[normalizedDay] ?? [];
   }
   
+  // Method to get all events, upcoming events, and past events
   List<MapEntry<DateTime, Event>> getAllEvents() {
     return events.entries
         .expand((entry) => entry.value.map((event) => MapEntry(entry.key, event)))
         .toList();
   }
   
+  // Get upcoming and past events
   List<MapEntry<DateTime, Event>> getUpcomingEvents() {
     final now = DateTime.now();
     final normalizedNow = DateTime(now.year, now.month, now.day);
@@ -370,6 +390,7 @@ class EventsService {
         .toList();
   }
   
+  // Get past events
   List<MapEntry<DateTime, Event>> getPastEvents() {
     final now = DateTime.now();
     final normalizedNow = DateTime(now.year, now.month, now.day);
@@ -380,6 +401,7 @@ class EventsService {
         .toList();
   }
   
+  // Get pinned events
   List<Event> getPinnedEvents() {
     return events.entries
         .expand((entry) => entry.value)
@@ -395,13 +417,15 @@ class EventsService {
         .toList();
   }
 
-  // In EventsService.dart - Add these methods to get pinned/unpinned polls and forms
 
 // Methods for Polls
+
+// Get all pinned polls
 List<Poll> getPinnedPolls() {
   return polls.where((poll) => poll.isPinned).toList();
 }
 
+// Get unpinned polls
 List<Poll> getUnpinnedPolls() {
   return polls.where((poll) => !poll.isPinned).toList();
 }
@@ -411,6 +435,7 @@ List<EventForm> getPinnedForms() {
   return forms.where((form) => form.isPinned).toList();
 }
 
+// Get unpinned forms
 List<EventForm> getUnpinnedForms() {
   return forms.where((form) => !form.isPinned).toList();
 }

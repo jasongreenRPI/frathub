@@ -4,6 +4,8 @@ import '../services/ride_service.dart';
 import '../services/user_service.dart';
 import 'queue_status_screen.dart';
 
+
+// The RideScreen widget is the main screen for requesting rides.
 class RideScreen extends StatefulWidget {
   const RideScreen({super.key});
 
@@ -11,12 +13,16 @@ class RideScreen extends StatefulWidget {
   State<RideScreen> createState() => _RideScreenState();
 }
 
+
+// The _RideScreenState class manages the state of the RideScreen widget.
 class _RideScreenState extends State<RideScreen> {
+  
   final _rideService = RideService();
   final _userService = UserService();
   final _pickupController = TextEditingController(text: 'LXA House');
   final _destinationController = TextEditingController();
   
+  // List of available locations
   List<Location> _locations = [];
   Location? _selectedPickup;
   Location? _selectedDestination;
@@ -26,6 +32,8 @@ class _RideScreenState extends State<RideScreen> {
   // Check if user has an active ride
   RideRequest? _activeRide;
   
+
+  //  Initialize the state
   @override
   void initState() {
     super.initState();
@@ -43,6 +51,8 @@ class _RideScreenState extends State<RideScreen> {
     });
   }
   
+
+  // Dispose of controllers
   @override
   void dispose() {
     _pickupController.dispose();
@@ -56,7 +66,7 @@ class _RideScreenState extends State<RideScreen> {
       _isLoadingLocations = true;
     });
     
-    // In a real app, this would be an API call
+    // In the real app, this would be an API call
     // For now, we'll use the dummy locations from rides in the service
     Future.delayed(const Duration(milliseconds: 500), () {
       final rides = _rideService.allRides;
@@ -127,7 +137,7 @@ class _RideScreenState extends State<RideScreen> {
       _isRequestingRide = true;
     });
     
-    // In a real app, this would be an API call
+    // In the real app, this would be an API call
     Future.delayed(const Duration(seconds: 1), () {
       if (!mounted) return;
       
@@ -203,6 +213,7 @@ class _RideScreenState extends State<RideScreen> {
     );
   }
 
+  // Build the UI for the ride screen
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -217,6 +228,7 @@ class _RideScreenState extends State<RideScreen> {
     );
   }
   
+  // Build the UI for requesting a ride
   Widget _buildRequestRideView() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -385,6 +397,7 @@ class _RideScreenState extends State<RideScreen> {
     );
   }
   
+  // Build the UI for the active ride
   Widget _buildActiveRideView() {
     final statusText = _getRideStatusText();
     final isPending = _activeRide!.status == RideStatus.pending || 
@@ -539,6 +552,7 @@ class _RideScreenState extends State<RideScreen> {
     );
   }
   
+  // Build the location dropdown
   Widget _buildLocationDropdown({
     required String hint,
     required Location? value,
@@ -574,6 +588,7 @@ class _RideScreenState extends State<RideScreen> {
     );
   }
   
+  // Build the ride detail row
   Widget _buildRideDetail(IconData icon, String label, String value) {
     return Row(
       children: [
@@ -601,6 +616,7 @@ class _RideScreenState extends State<RideScreen> {
     );
   }
   
+  // Build the driver details section
   Widget _buildDriverDetails() {
     // Find driver from the ride service
     final driverId = _activeRide!.driverId;
@@ -679,6 +695,7 @@ class _RideScreenState extends State<RideScreen> {
     );
   }
   
+  // Get the status text based on the ride status
   String _getRideStatusText() {
     switch (_activeRide!.status) {
       case RideStatus.pending:
@@ -698,6 +715,7 @@ class _RideScreenState extends State<RideScreen> {
     }
   }
   
+  // Get the color based on the ride status
   Color _getStatusColor() {
     switch (_activeRide!.status) {
       case RideStatus.pending:

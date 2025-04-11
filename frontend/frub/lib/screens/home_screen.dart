@@ -3,9 +3,10 @@ import '../services/user_service.dart';
 import 'ride_screen.dart';
 import 'user_profile_screen.dart';
 import 'login_screen.dart';
-import 'events_screen.dart'; // Import the new EventsScreen
+import 'events_screen.dart';
 import '/screens/admin/ride_admin_screens.dart';
 
+// The HomeScreen widget is the main screen of the app.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -13,6 +14,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+// The _HomeScreenState class manages the state of the HomeScreen widget.
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   final userService = UserService();
@@ -23,12 +25,13 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     
     // For demo purposes, every user is an admin
-    // In a real app, you would check the user's role
+    // In the real app, we would check the user's role
     setState(() {
       _isAdmin = true;
     });
   }
   
+  // This method is called when the user taps on a tab in the bottom navigation bar.
   @override
   Widget build(BuildContext context) {
     // Create the different tab pages
@@ -44,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       const RideScreen(),
-      const EventsScreen(isAdmin: true), // Add this line for the Events tab
+      const EventsScreen(isAdmin: true), 
       const UserProfileScreen(),
     ];
   
@@ -100,7 +103,6 @@ class _HomeScreenState extends State<HomeScreen> {
             });
           }
         },
-        // Add this line to always show the labels
         type: BottomNavigationBarType.fixed,
         // This ensures labels are always visible
         showSelectedLabels: true,
@@ -115,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Ride',
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.event),  // Icon for Events tab
+            icon: Icon(Icons.event), 
             label: 'Events',
           ),
           const BottomNavigationBarItem(
