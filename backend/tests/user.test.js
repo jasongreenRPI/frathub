@@ -59,4 +59,50 @@ describe("User Routes", () => {
 
     expect(response.status).toBe(401);
   });
+
+  it("Should create a new user (authenticated)", async () => {
+    const newUserData = {
+      email: "newuser@test.com",
+      password: "password123",
+      username: "newuser",
+      firstName: "New",
+      lastName: "User",
+      role: "user",
+    };
+
+    const response = await request(app)
+      .post("/api/users")
+      .set("Authorization", `Bearer ${token}`)
+      .send(newUserData);
+
+    expect(response.status).toBe(201);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.email).toBe(newUserData.email);
+  });
+
+  it("Should update a user (authenticated)", async () => {
+    const updateData = {
+      firstName: "Updated",
+      lastName: "User",
+    };
+
+    const response = await request(app)
+      .put(`/api/users/${userId}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send(updateData);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.firstName).toBe(updateData.firstName);
+    expect(response.body.data.lastName).toBe(updateData.lastName);
+  });
+
+  it("Should delete a user (authenticated)", async () => {
+    const response = await request(app)
+      .delete(`/api/users/${userId}`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+  });
 });

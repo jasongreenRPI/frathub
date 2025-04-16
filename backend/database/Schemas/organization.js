@@ -2,43 +2,59 @@ const mongoose = require("mongoose");
 const User = require("./user");
 const bcrypt = require("bcrypt");
 
-const organizationSchema = mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  current_encrypted_key: { type: String, default: "" },
-  superUserId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  memberIds: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+const organizationSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "Organization name is required"],
+      trim: true,
+      unique: true,
     },
-  ],
-  officerIds: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+    description: {
+      type: String,
+      required: [true, "Organization description is required"],
+      trim: true,
     },
-  ],
-  settings: {
-    openQueue: { type: Boolean, default: false },
-    allowExternalUsers: { type: Boolean, default: false },
+    logo: {
+      type: String,
+      default: null,
+    },
+    members: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        role: {
+          type: String,
+          enum: ["member", "officer", "admin"],
+          default: "member",
+        },
+        joinedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    events: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Event",
+      },
+    ],
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
 class organizationInterface {
   static async createOrganization(name, superUserId, key) {
@@ -85,16 +101,10 @@ class organizationInterface {
     }
 
     // Add user to memberIds
-    org.memberIds.push(memberId);
-
-    // Add user to officerIds if specified in roles
-    if (roles.includes("officer")) {
-      org.officerIds.push(memberId);
-      user.role = "officer";
-    } else if (roles.includes("user")) {
-      org.memberIds.push(user);
-      user.role = "user";
-    }
+    org.members.push({
+      user: memberId,
+      role: roles.includes("officer") ? "officer" : "member",
+    });
 
     // Update the user's orgId
     user.orgId = orgId;
@@ -108,11 +118,17 @@ class organizationInterface {
   }
 
   hasMember(memberId) {
-    return this.memberIds.some((id) => id.toString() === memberId.toString());
+    return this.members.some(
+      (member) => member.user.toString() === memberId.toString()
+    );
   }
 
   hasOfficer(userId) {
-    return this.officerIds.some((id) => id.toString() === userId.toString());
+    return this.members.some(
+      (member) =>
+        member.user.toString() === userId.toString() &&
+        member.role === "officer"
+    );
   }
 
   isSuperUser(userId) {
@@ -144,14 +160,9 @@ class organizationInterface {
       throw new Error("Cannot remove the organization's super user");
     }
 
-    // Remove from memberIds
-    org.memberIds = org.memberIds.filter(
-      (id) => id.toString() !== memberId.toString()
-    );
-
-    // Remove from officerIds if present
-    org.officerIds = org.officerIds.filter(
-      (id) => id.toString() !== memberId.toString()
+    // Remove from members
+    org.members = org.members.filter(
+      (member) => member.user.toString() !== memberId.toString()
     );
 
     // Update user's orgId and role
@@ -171,8 +182,8 @@ class organizationInterface {
       throw new Error("orgId, memberId, and newRole are required");
     }
 
-    if (!["user", "officer"].includes(newRole)) {
-      throw new Error("newRole must be either 'user' or 'officer'");
+    if (!["member", "officer"].includes(newRole)) {
+      throw new Error("newRole must be either 'member' or 'officer'");
     }
 
     const org = await this.findById(orgId);
@@ -195,15 +206,12 @@ class organizationInterface {
       throw new Error("Cannot change the organization's super user role");
     }
 
-    if (newRole === "officer" && !org.hasOfficer(memberId)) {
-      org.officerIds.push(memberId);
-      user.role = "officer";
-    } else if (newRole === "user" && org.hasOfficer(memberId)) {
-      org.officerIds = org.officerIds.filter(
-        (id) => id.toString() !== memberId.toString()
-      );
-      user.role = "user";
-    }
+    // Update member role
+    org.members = org.members.map((member) =>
+      member.user.toString() === memberId.toString()
+        ? { ...member, role: newRole }
+        : member
+    );
 
     org.updatedAt = new Date();
 
@@ -367,12 +375,12 @@ class organizationInterface {
       throw new Error("orgId is required");
     }
 
-    const org = await this.findById(orgId).populate("memberIds");
+    const org = await this.findById(orgId).populate("members.user");
     if (!org) {
       throw new Error("Organization not found");
     }
 
-    return org.memberIds;
+    return org.members.map((member) => member.user);
   }
 
   static async getAllOfficers(orgId) {
@@ -380,14 +388,15 @@ class organizationInterface {
       throw new Error("orgId is required");
     }
 
-    const org = await this.findById(orgId).populate("officerIds");
+    const org = await this.findById(orgId).populate("members.user");
     if (!org) {
       throw new Error("Organization not found");
     }
 
-    return org.officerIds;
+    return org.members
+      .filter((member) => member.role === "officer")
+      .map((member) => member.user);
   }
-  
 }
 
 organizationSchema.loadClass(organizationInterface);

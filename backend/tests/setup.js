@@ -1,15 +1,29 @@
 const mongoose = require("mongoose");
 const { MongoMemoryServer } = require("mongodb-memory-server");
 const request = require("supertest");
+const app = require("../index");
+const User = require("../database/Schemas/user");
+const Organization = require("../database/Schemas/organization");
 
 // Set test environment before importing the app
 process.env.NODE_ENV = "test";
 
 // Import app after setting NODE_ENV to prevent automatic connection
-const { app, server } = require("../index");
+const { server } = require("../index");
 let mongoServer;
 
-// Connect to the in-memory database
+// Mock external services
+jest.mock("../utils/email", () => ({
+  sendEmail: jest.fn().mockResolvedValue(true),
+  sendPasswordResetEmail: jest.fn().mockResolvedValue(true),
+}));
+
+jest.mock("../utils/storage", () => ({
+  uploadFile: jest.fn().mockResolvedValue("https://example.com/file.jpg"),
+  deleteFile: jest.fn().mockResolvedValue(true),
+}));
+
+// Setup before all tests
 beforeAll(async () => {
   // Close any existing connection
   if (mongoose.connection.readyState !== 0) {
@@ -18,15 +32,21 @@ beforeAll(async () => {
 
   mongoServer = await MongoMemoryServer.create();
   const mongoUri = mongoServer.getUri();
-  await mongoose.connect(mongoUri);
+  await mongoose.connect(mongoUri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
 });
 
-// Clear all data between tests
+// Clean up after each test
 afterEach(async () => {
   const collections = mongoose.connection.collections;
   for (const key in collections) {
     await collections[key].deleteMany();
   }
+
+  // Clear all mocks
+  jest.clearAllMocks();
 });
 
 // Close database connection and stop server
@@ -63,10 +83,51 @@ const officerData = {
   firstName: "Officer",
   lastName: "User",
   role: "officer",
-};       
+};
+
+// Helper functions for tests
+const createTestUser = async (userData = {}) => {
+  const defaultUserData = {
+    email: `test${Date.now()}@example.com`,
+    password: "password123",
+    username: `testuser${Date.now()}`,
+    firstName: "Test",
+    lastName: "User",
+    role: "user",
+    ...userData,
+  };
+
+  const user = new User(defaultUserData);
+  await user.save();
+  return user;
+};
+
+const createTestOrganization = async (orgData = {}) => {
+  const defaultOrgData = {
+    name: `Test Org ${Date.now()}`,
+    description: "A test organization",
+    ...orgData,
+  };
+
+  const org = new Organization(defaultOrgData);
+  await org.save();
+  return org;
+};
+
+const getAuthToken = async (user) => {
+  const response = await request(app).post("/api/auth/login").send({
+    email: user.email,
+    password: "password123",
+  });
+
+  return response.body.token;
+};
 
 module.exports = {
   app,
   server,
   request,
+  createTestUser,
+  createTestOrganization,
+  getAuthToken,
 };
