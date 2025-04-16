@@ -1,6 +1,6 @@
 name: frub
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
@@ -10,8 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
-  table_calendar: ^3.0.9  # Add this line
-  
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
